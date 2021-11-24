@@ -2,7 +2,7 @@ try:
   from rlnav.configs.configurations import setup_configurations, get_config_dict
   from rlnav.logging import test_model, WANDBMonitor
 except ImportError as e:
-  raise Exception("rlnav package is not installed! Please go into the PythonLibraries/rlnav and install the package locally by running 'pip install -e .'")
+  raise Exception("rlnav package is not installed! Please go into the PythonLibraries/rlnav and install the package locally by running 'pip install -e .' Also, please ensure that you have cloned to repo with --recurse-submodules flag.")
 
 from mlagents_envs import environment
 from stable_baselines3 import PPO
