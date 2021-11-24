@@ -1,0 +1,6 @@
+[submodule "PythonLibraries/PythonLibraries/stable-baselines3"]
+	path = PythonLibraries/PythonLibraries/stable-baselines3
+	url = https://github.com/batu/stable-baselines3.git
+[submodule "PythonLibraries/stable-baselines3"]
+	path = PythonLibraries/stable-baselines3
+	url = https://github.com/batu/stable-baselines3.git

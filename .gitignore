@@ -58,3 +58,5 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+*.pyc
+GymEnvironments/0_Debug/Windows/Env_Data/ML-Agents/Timers/DebugEnv_timers.json
