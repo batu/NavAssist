@@ -36,10 +36,11 @@ public class Inferer : MonoBehaviour, InputHandler
         
         _runtimeModel = ModelLoader.Load(modelAsset);
         _inputShape = _runtimeModel.inputs[0].shape[_runtimeModel.inputs[0].shape.Length - 1];
-        _inputShape = 505; //463;
+        _inputShape = 505; 
+        
         print($"Input shape for the model: {_runtimeModel.outputs[0]}");
         // _worker = WorkerFactory.CreateWorker(WorkerFactory.Type.CSharpRef, _runtimeModel);
-        _worker = WorkerFactory.CreateWorker(WorkerFactory.Type.Compute, _runtimeModel);
+        _worker = WorkerFactory.CreateWorker(WorkerFactory.Type.CSharpBurst, _runtimeModel);
         
         StartCoroutine(AskForDecision());
 
@@ -58,6 +59,7 @@ public class Inferer : MonoBehaviour, InputHandler
             {
                 List<float> obsList = new List<float>();
                 obsList.Add(_vectorObservation.GetObservation());
+                
         
                 if (_navigationAgent.useLocalRaycasts)
                 {

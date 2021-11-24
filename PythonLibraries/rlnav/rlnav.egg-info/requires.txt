@@ -1,0 +1,4 @@
+stable-baselines3@ file://C:\Users\batua\Desktop\NavAssist\PythonLibraries\stable-baselines3
+mlagents-envs@ file://C:\Users\batua\Desktop\NavAssist\PythonLibraries\ml-agents\ml-agents-envs
+gym-unity@ file://C:\Users\batua\Desktop\NavAssist\PythonLibraries\ml-agents\gym-unity
+mlagents@ file://C:\Users\batua\Desktop\NavAssist\PythonLibraries\ml-agents\ml-agents

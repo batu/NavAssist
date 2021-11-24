@@ -1,0 +1,187 @@
+wandb_version: 1
+
+Activation:
+  desc: null
+  value: Relu
+Algorithm:
+  desc: null
+  value: SAC
+Graph:
+  desc: null
+  value: false
+PI:
+  desc: null
+  value:
+  - 512
+  - 512
+Source:
+  desc: null
+  value: LapLocaltop
+VF:
+  desc: null
+  value:
+  - 512
+  - 512
+_init_setup_model:
+  desc: null
+  value: true
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.10.27
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.7.10
+    t:
+      1:
+      - 1
+      4: 3.7.10
+      5: 0.10.27
+      8:
+      - 3
+      - 5
+activation_fn:
+  desc: null
+  value: torch.nn.modules.activation.ReLU
+batch_size:
+  desc: null
+  value: 256
+clip_range:
+  desc: null
+  value: 0.2
+clip_range_vf:
+  desc: null
+  value: null
+create_eval_env:
+  desc: null
+  value: false
+curriculum_length:
+  desc: null
+  value: 15000000
+decision_frequency:
+  desc: null
+  value: 10
+depthmap_raycount:
+  desc: null
+  value: 3
+depthmap_raylen:
+  desc: null
+  value: 50
+depthmap_rayseperation:
+  desc: null
+  value: 2
+device:
+  desc: null
+  value: auto
+ent_coef:
+  desc: null
+  value: 0.02
+env_count:
+  desc: null
+  value: 32
+failed_episode_start:
+  desc: null
+  value: 0
+failed_episode_threshold:
+  desc: null
+  value: 0.0
+gae_lambda:
+  desc: null
+  value: 0.975
+gamma:
+  desc: null
+  value: 0.99
+learning_rate:
+  desc: null
+  value: rlnav.schedules.linear_schedule.<locals>.func
+max_grad_norm:
+  desc: null
+  value: 0.5
+n_epochs:
+  desc: null
+  value: 3
+n_steps:
+  desc: null
+  value: 256
+net_arch:
+  desc: null
+  value:
+  - pi:
+    - 512
+    - 512
+    vf:
+    - 512
+    - 512
+occupancy_xz_len:
+  desc: null
+  value: 4
+occupancy_y_len:
+  desc: null
+  value: 2
+randomization_percentage:
+  desc: null
+  value: 0.1
+randomize_decision_freq:
+  desc: null
+  value: 0
+sde_sample_freq:
+  desc: null
+  value: -1
+seed:
+  desc: null
+  value: null
+target_kl:
+  desc: null
+  value: null
+tensorboard_log:
+  desc: null
+  value: null
+time_scale:
+  desc: null
+  value: 2
+useDense:
+  desc: null
+  value: 1
+usePBRS:
+  desc: null
+  value: 0
+use_absolute_positions:
+  desc: null
+  value: 1
+use_depthmap:
+  desc: null
+  value: 1
+use_occupancy:
+  desc: null
+  value: 1
+use_rotations:
+  desc: null
+  value: 0
+use_sde:
+  desc: null
+  value: false
+use_whiskers:
+  desc: null
+  value: 1
+verbose:
+  desc: null
+  value: 2
+vf_coef:
+  desc: null
+  value: 0.5
+whisker_groundraylen:
+  desc: null
+  value: 0.5
+whisker_groundrayseperation:
+  desc: null
+  value: 1
+whisker_raycount:
+  desc: null
+  value: 8
+whisker_raylen:
+  desc: null
+  value: 2
+whisker_verticalraycount:
+  desc: null
+  value: 2

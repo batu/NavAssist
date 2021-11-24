@@ -37,21 +37,20 @@ public class OccupancyGridObservation : MonoBehaviour, IObservation
         _navigationAgent = GetComponent<NavigationAgent>();
         _agentTransform = _navigationAgent.transform;
     }
-    void Start() 
+    void Start()
     {  
-        if (_occupancyGrid.occupancyArray == null || _occupancyGrid.occupancyArray.Length == 0) 
+        if (_occupancyGrid.Occupancy == null) 
         {
             if (transform.parent.GetComponent<EpisodeHandler>() == null)
             {
                 Debug.LogWarning("The parent object should be the Environment. This might cause problems.");
             } 
             _occupancyGrid.env = transform.parent;
-            _occupancyGrid.CreateOccupancyArray();
+            _occupancyGrid.CreateOccupancyDict();
             print($"New Occupancy Grid has been created.");
         }
     }
   
-    // Update is called once per frame
     public float[] GetObservation() 
     {
         return _occupancyGrid.GetPlayerArea(_agentTransform.localPosition, OccupancyObsCountXZ, OccupancyObsCountY, OccupancyObsCountXZ);

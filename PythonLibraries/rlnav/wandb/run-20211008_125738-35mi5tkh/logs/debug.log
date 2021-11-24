@@ -1,0 +1,24 @@
+2021-10-08 12:57:38,866 INFO    MainThread:32896 [wandb_setup.py:_flush():69] Unhandled environment var: WANDB_API
+2021-10-08 12:57:38,866 INFO    MainThread:32896 [wandb_setup.py:_flush():69] setting env: {}
+2021-10-08 12:57:38,866 INFO    MainThread:32896 [wandb_setup.py:_flush():69] setting login settings: {}
+2021-10-08 12:57:38,867 INFO    MainThread:32896 [wandb_init.py:_log_setup():336] Logging user logs to C:\Users\batua\Desktop\RLNav\RLAgency\src\rlnav\wandb\run-20211008_125738-35mi5tkh\logs\debug.log
+2021-10-08 12:57:38,867 INFO    MainThread:32896 [wandb_init.py:_log_setup():337] Logging internal logs to C:\Users\batua\Desktop\RLNav\RLAgency\src\rlnav\wandb\run-20211008_125738-35mi5tkh\logs\debug-internal.log
+2021-10-08 12:57:38,867 INFO    MainThread:32896 [wandb_init.py:init():369] calling init triggers
+2021-10-08 12:57:38,867 INFO    MainThread:32896 [wandb_init.py:init():376] wandb.init called with sweep_config: {}
+config: {'Algorithm': 'SAC', 'Source': 'LapLocaltop', 'Activation': 'Relu', 'VF': [512, 512], 'PI': [512, 512], 'usePBRS': 0, 'useDense': 1, 'decision_frequency': 10, 'randomize_decision_freq': 0, 'randomization_percentage': 0.1, 'use_rotations': 0, 'use_absolute_positions': 1, 'use_occupancy': 1, 'occupancy_xz_len': 4, 'occupancy_y_len': 2, 'use_depthmap': 1, 'depthmap_raylen': 50, 'depthmap_raycount': 3, 'depthmap_rayseperation': 2, 'use_whiskers': 1, 'whisker_raycount': 8, 'whisker_verticalraycount': 2, 'whisker_raylen': 2, 'whisker_groundraylen': 0.5, 'whisker_groundrayseperation': 1, 'time_scale': 2, 'env_count': 32, 'curriculum_length': 15000000, 'failed_episode_threshold': 0.0, 'failed_episode_start': 0, '_init_setup_model': True, 'batch_size': 256, 'n_steps': 256, 'n_epochs': 3, 'learning_rate': <function linear_schedule.<locals>.func at 0x000001B6EA38DC18>, 'clip_range': 0.2, 'clip_range_vf': None, 'create_eval_env': False, 'device': 'auto', 'ent_coef': 0.02, 'gae_lambda': 0.975, 'gamma': 0.99, 'max_grad_norm': 0.5, 'sde_sample_freq': -1, 'seed': None, 'target_kl': None, 'tensorboard_log': None, 'use_sde': False, 'verbose': 2, 'vf_coef': 0.5, 'activation_fn': <class 'torch.nn.modules.activation.ReLU'>, 'net_arch': [{'pi': [512, 512], 'vf': [512, 512]}], 'Graph': False}
+2021-10-08 12:57:38,867 INFO    MainThread:32896 [wandb_init.py:init():418] starting backend
+2021-10-08 12:57:38,867 INFO    MainThread:32896 [backend.py:_multiprocessing_setup():71] multiprocessing start_methods=spawn, using: spawn
+2021-10-08 12:57:38,872 INFO    MainThread:32896 [backend.py:ensure_launched():123] starting backend process...
+2021-10-08 12:57:38,954 INFO    MainThread:32896 [backend.py:ensure_launched():128] started backend process with pid: 28776
+2021-10-08 12:57:38,955 INFO    MainThread:32896 [wandb_init.py:init():423] backend started and connected
+2021-10-08 12:57:38,956 INFO    MainThread:32896 [wandb_init.py:init():465] updated telemetry
+2021-10-08 12:57:38,957 INFO    MainThread:32896 [wandb_init.py:init():484] communicating current version
+2021-10-08 12:57:40,396 INFO    MainThread:32896 [wandb_init.py:init():489] got version response upgrade_message: "wandb version 0.12.4 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2021-10-08 12:57:40,398 INFO    MainThread:32896 [wandb_init.py:init():497] communicating run to backend with 30 second timeout
+2021-10-08 12:57:40,752 INFO    MainThread:32896 [wandb_init.py:init():522] starting run threads in backend
+2021-10-08 12:57:40,946 INFO    MainThread:32896 [wandb_run.py:_console_start():1524] atexit reg
+2021-10-08 12:57:40,947 INFO    MainThread:32896 [wandb_run.py:_redirect():1371] redirect: SettingsConsole.WRAP
+2021-10-08 12:57:40,947 INFO    MainThread:32896 [wandb_run.py:_redirect():1414] Wrapping output streams.
+2021-10-08 12:57:40,947 INFO    MainThread:32896 [wandb_run.py:_redirect():1438] Redirects installed.
+2021-10-08 12:57:40,947 INFO    MainThread:32896 [wandb_init.py:init():546] run started, returning control to user process

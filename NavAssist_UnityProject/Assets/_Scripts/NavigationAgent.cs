@@ -1,5 +1,6 @@
 using System;
-using Unity.Collections.LowLevel.Unsafe;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -17,8 +18,9 @@ public class NavigationAgent :  Agent, InputHandler
     [SerializeField] public bool useOccupancyGrid = true;
     [SerializeField] public bool useLocalRaycasts = true;
     
-    [Header("Actions")]
+    [Header("Movement")]
     public bool useRotation = false;
+    public float randomizationPercentage = 0f;
     
     private DepthMaskObservation _depthMaskObservation;
     private OccupancyGridObservation _occupancyGridObservation;
@@ -40,9 +42,9 @@ public class NavigationAgent :  Agent, InputHandler
 
     // Reward
     [Header("Rewards")] [SerializeField]
-    bool useDense = true;
+    public bool useDense = true;
     [SerializeField]
-    bool usePBRS = true;
+    public bool usePBRS = true;
     
     private float _existentialPunishment = -1f / 100f;
     private float _lastDistance;
@@ -50,7 +52,16 @@ public class NavigationAgent :  Agent, InputHandler
 
     public delegate void EpisodeStarted();
     public EpisodeStarted StartEpisode;
+    [CanBeNull] private SuccessRateMeasure _successRateMeasure;
+    [CanBeNull] private DecisionPeriodRandomizer _decisionPeriodRandomizer;
 
+    private float _initMaxSpeedOnGround;
+    private float _initMovementSharpnessOnGround;
+    private float _initMaxSpeedInAir;
+    private float _initAccelerationSpeedInAir;
+    private float _initJumpForce;
+
+    private bool isGhost = false;
     private void Awake()
     {
         if (useRotation)
@@ -66,13 +77,53 @@ public class NavigationAgent :  Agent, InputHandler
         _depthMaskObservation = GetComponent<DepthMaskObservation>();
         _whiskerObservation = GetComponent<WhiskerObservation>();
         _occupancyGridObservation = GetComponent<OccupancyGridObservation>();
+        
+        _initMaxSpeedOnGround = _characterController.maxSpeedOnGround;
+        _initMovementSharpnessOnGround = _characterController.movementSharpnessOnGround;
+        _initMaxSpeedInAir = _characterController.maxSpeedInAir;
+        _initAccelerationSpeedInAir = _characterController.accelerationSpeedInAir;
+        _initJumpForce = _characterController.jumpForce;
+
+        isGhost = transform.name == "Ghost";
     }
 
-    void Start()
-    { 
-
+    public void RandomizePlayerMovement()
+    {
+        float randomRange = _initMaxSpeedOnGround * randomizationPercentage;
+        float randomAmount = UnityEngine.Random.Range(-randomRange,  randomRange);
+        _characterController.maxSpeedOnGround = _initMaxSpeedOnGround + randomAmount;
         
+        randomRange = _initMovementSharpnessOnGround * randomizationPercentage;
+        randomAmount = UnityEngine.Random.Range(-randomRange,  randomRange);
+        _characterController.movementSharpnessOnGround = _initMovementSharpnessOnGround + randomAmount;
+
+        randomRange = _initMaxSpeedInAir * randomizationPercentage;
+        randomAmount = UnityEngine.Random.Range(-randomRange,  randomRange);
+        _characterController.maxSpeedInAir = _initMaxSpeedInAir + randomAmount;
+
+        randomRange = _initAccelerationSpeedInAir * randomizationPercentage;
+        randomAmount = UnityEngine.Random.Range(-randomRange,  randomRange);
+        _characterController.accelerationSpeedInAir = _initAccelerationSpeedInAir + randomAmount;
+
+        randomRange = _initJumpForce * randomizationPercentage;
+        randomAmount = UnityEngine.Random.Range(-randomRange,  randomRange);
+        _characterController.jumpForce = _initJumpForce + randomAmount;
+    }
+
+    public void ResetPlayerMovement()
+    {
+        _characterController.maxSpeedOnGround = _initMaxSpeedOnGround;
+        _characterController.movementSharpnessOnGround = _initMovementSharpnessOnGround;
+        _characterController.maxSpeedInAir = _initMaxSpeedInAir;
+        _characterController.accelerationSpeedInAir = _initAccelerationSpeedInAir;
+        _characterController.jumpForce = _initJumpForce;
+    }
+    
+    void Start()
+    {
         _existentialPunishment = -1f / ((float)MaxStep / _decisionRequester.DecisionPeriod);
+        _successRateMeasure = FindObjectOfType<SuccessRateMeasure>();
+        _decisionPeriodRandomizer = FindObjectOfType<DecisionPeriodRandomizer>();
     }
     private void Update()
     {
@@ -83,11 +134,11 @@ public class NavigationAgent :  Agent, InputHandler
 
         if (!_agentDone && transform.position.y < -15)
         {
-            KillAgent();
+            EpisodeFailed();
         }
     }
 
-    private void KillAgent()
+    public void EpisodeFailed()
     {
         _agentDone = true;
         _success = false;
@@ -96,14 +147,17 @@ public class NavigationAgent :  Agent, InputHandler
 
     public override void OnEpisodeBegin()
     {
+        if (randomizationPercentage != 0)
+        {   
+            RandomizePlayerMovement();
+        }
         StartEpisode?.Invoke();
         _success = false;
         _agentDone = false;
         _lastDistance = Vector3.Distance(transform.position, goal.transform.position) / maxDistance;
         _lastShapeReward = 0;
-
     }
-     
+    
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
@@ -113,7 +167,6 @@ public class NavigationAgent :  Agent, InputHandler
         continuousActionsOut[2] = Input.GetButton("Jump") ? 1f : 0f;
     }
     
-    // Start is called before the first frame update
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         float xMovement = Mathf.Clamp(actionBuffers.ContinuousActions[0],-1f, 1f);
@@ -159,17 +212,35 @@ public class NavigationAgent :  Agent, InputHandler
   
     private void FixedUpdate()
     {
-        if (_agentDone && Academy.Instance.StepCount % _decisionRequester.DecisionPeriod == 0)
+        UpdateDecisionFrequency();
+        
+        if (_agentDone && (Academy.Instance.StepCount) % _decisionRequester.DecisionPeriod == 0)
         {
             if (_success)
             {
                 AddReward(1f);
+                _successRateMeasure?.UpdateResults(SuccessRateMeasure.EpisodeResult.Success);
             }
             else
             {
                 AddReward(-1f);
+                _successRateMeasure?.UpdateResults(SuccessRateMeasure.EpisodeResult.Failed);
             }
             EndEpisode();
+        }
+
+        if (!isGhost && StepCount == MaxStep - 1)
+        {
+            _successRateMeasure?.UpdateResults(SuccessRateMeasure.EpisodeResult.Timedout);
+        }
+        
+    }
+
+    private void UpdateDecisionFrequency()
+    {
+        if (_decisionPeriodRandomizer?.randomizeDecisionPeriod ?? false)
+        {
+            _decisionRequester.DecisionPeriod = _decisionPeriodRandomizer.currentDecisionPeriod;
         }
     }
 
@@ -231,7 +302,7 @@ public class NavigationAgent :  Agent, InputHandler
 
     public bool GetSprintInputHeld()
     {
-        return true; // Shift
+        return false; // Shift
     }
 
     public bool GetCrouchInputDown()

@@ -30,15 +30,18 @@ public class EnvOccupancyGrid : ScriptableObject
     private int _height;
     private int _depth;
     private Vector3 _envPosition;
-
-    // Fix hte name 
-    public void CreateOccupancyArray()
+    public void CreateOccupancyDict()
     {
 
         Debug.Log("Created new occupancy dict."); 
         Occupancy = new Dictionary<Vector3Int, bool>();
         _episodeHandler = env.GetComponent<EpisodeHandler>();
         _envPosition = env.position;
+
+        if (env.rotation.y != 0)
+        {
+            Debug.LogError("The rotation of the environment needs to be set to 0!");
+        }
 
         if (_episodeHandler == null)
         {
@@ -155,7 +158,7 @@ public class EnvOccupancyGrid : ScriptableObject
     {
         Vector3 playerPosition = playerTransform.localPosition;
         Vector3 envPosition = playerTransform.parent.position;
-        if (occupancyArray == null)
+        if (Occupancy == null)
         {
             Debug.LogWarning("Can't visualize the occupancy because the occupancy dictionary is not created. " +
                              "Please play the scene and ensure CreateOccupancyDict is called to regenerate a " +

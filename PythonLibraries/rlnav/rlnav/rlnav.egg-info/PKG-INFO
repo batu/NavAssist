@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: rlnav
+Version: 0.0.0
+Summary: Reinforcement Learning for Navigation and Player/Designer Assistance
+Home-page: UNKNOWN
+Author: Batu Aytemiz
+License: MIT
+Platform: win32
+Classifier: Programming Language :: Python :: 3.7
+Requires-Python: >=3.7
+
+UNKNOWN
+

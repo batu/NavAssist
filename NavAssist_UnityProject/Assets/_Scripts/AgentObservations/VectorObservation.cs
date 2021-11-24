@@ -5,7 +5,8 @@ using UnityEngine;
 public class VectorObservation : MonoBehaviour, IObservation
 {
     // Start is called before the first frame update
-    private GameObject _goal;
+    [HideInInspector]
+    public GameObject goal;
 
     private NavigationAgent _navigationAgent;
     private PlayerCharacterController _playerCharacterController;
@@ -19,7 +20,7 @@ public class VectorObservation : MonoBehaviour, IObservation
         _playerCharacterController = GetComponent<PlayerCharacterController>();
 
         _useAbsolutePositions = _navigationAgent.useAbsolutePositions;
-        _goal = _navigationAgent.goal;
+        goal = _navigationAgent.goal;
         _maxDistance = _navigationAgent.maxDistance;
     }
     
@@ -30,7 +31,7 @@ public class VectorObservation : MonoBehaviour, IObservation
         List<float> vectorResults = new List<float>();
         
         var localPosition = transform.localPosition;
-        var goalPosition = _goal.transform.localPosition;
+        var goalPosition = goal.transform.localPosition;
         
         Vector3 dir = goalPosition - localPosition;
         vectorResults.Add(CanSeeGoal(dir.normalized)); //0
@@ -41,9 +42,9 @@ public class VectorObservation : MonoBehaviour, IObservation
         int isGroundedInt = _playerCharacterController.isGrounded ? 1 : 0; 
         vectorResults.Add((_playerCharacterController.m_remainingJumpCount + isGroundedInt) / 2f); // 8
 
-        vectorResults.Add(_playerCharacterController.characterVelocity.x /  _playerCharacterController.maxSpeedOnGround); // 9
+        vectorResults.Add(_playerCharacterController.characterVelocity.x /  (_playerCharacterController.maxSpeedOnGround * 5)); // 9
         vectorResults.Add(Mathf.Clamp(_playerCharacterController.characterVelocity.y / (_playerCharacterController.maxSpeedInAir * 5), -1, 1)); // 10
-        vectorResults.Add(_playerCharacterController.characterVelocity.z / _playerCharacterController.maxSpeedOnGround); // 11
+        vectorResults.Add(_playerCharacterController.characterVelocity.z / (_playerCharacterController.maxSpeedOnGround * 5)); // 11
         
         vectorResults.Add(_playerCharacterController.isGrounded); // 12
 

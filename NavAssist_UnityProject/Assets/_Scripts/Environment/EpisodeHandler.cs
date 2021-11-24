@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Unity.Mathematics;
 using Unity.MLAgents;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
@@ -14,8 +17,10 @@ public class EpisodeHandler : MonoBehaviour
     public Transform Goal;
     public Transform Ground;
 
-
     private float maxDistance { get; set; } = 1f;
+
+    public bool moveAgentToInit = false;
+    public bool moveGoalToInit = false;
 
     [HideInInspector]
     public float xLen;
@@ -35,36 +40,47 @@ public class EpisodeHandler : MonoBehaviour
     public float curriculumEndStep = -1;
 
     private float _startCurriculumDistance = 10f;
-    private float _maxCurriculumDistance = 100f;
+    private float _maxCurriculumDistance;
+    
+    private EnvironmentParameters _envParameters;
+    float _numEnvsAdjustment;
 
+    private NavigationAgent _agentScript;
     // Start is called before the first frame update
     private void Awake()
     {
-        NavigationAgent agentScript = Agent.GetComponent<NavigationAgent>();
-        agentScript.StartEpisode += RestartEpisode;
+        _agentScript = Agent.GetComponent<NavigationAgent>();
+        _agentScript.StartEpisode += RestartEpisode;
+        
+        _episodeDataset = FindObjectOfType<EpisodeDataset>();
         
         xLen = Ground.GetComponent<BoxCollider>().bounds.size.x;
         zLen = Ground.GetComponent<BoxCollider>().bounds.size.z;
         maxDistance = Mathf.Sqrt(xLen * xLen + zLen * zLen);
-        agentScript.maxDistance = maxDistance;
-
+        _agentScript.maxDistance = maxDistance;
+        _maxCurriculumDistance = maxDistance;
+        
         _agentInitialPosition = Agent.position;
         _goalInitialPosition = Goal.position;
         _trailRenderer = Agent.GetComponentInChildren<TrailRenderer>();
+        
+        _envParameters = Academy.Instance.EnvironmentParameters;
+        _numEnvsAdjustment = _envParameters.GetWithDefault("env_count", 32) / 10f;
 
     }
-
-    private void Start()
-    {
-    }
-    
 
     public void RestartEpisode()
     {
-        
+        _testing = 0 < _envParameters.GetWithDefault("testing", 0);
         MoveAgentRandomly();
-        // how many steps have we taken 
-        if (Academy.Instance.TotalStepCount > curriculumEndStep)
+
+        if (_testing)
+        {
+            _agentScript.ResetPlayerMovement();
+        }
+        
+        bool curriculumActive = Academy.Instance.TotalStepCount * _numEnvsAdjustment < curriculumEndStep;
+        if (!curriculumActive || _testing)
         {
             MoveGoalRandomly();
         }
@@ -72,16 +88,52 @@ public class EpisodeHandler : MonoBehaviour
         {
             MoveGoalClose();
         }
+
+        // MoveGoalToPreSetPlaces();
         
-        // MoveAgenttoInitialPlace();
-        // MoveGoaltoInitialPlace();
+        if(moveAgentToInit)
+            MoveAgenttoInitialPlace();
+    
+        if(moveGoalToInit)
+            MoveGoaltoInitialPlace();
+    
+        if (_episodeDataset)
+            MoveGoalAgentToPresetPosition();
+        
         _trailRenderer.Clear();
     }
 
+    
+    
+    [HideInInspector]
+    public int goalPositionIdx = 0;
+    [HideInInspector]
+    public Vector3[] goalPositions =
+    {
+        new Vector3(-25.24f, 38.68f, 28.8f),
+        new Vector3( 37.29f, 30.44f, 3.9f),
+        new Vector3( 33.24f, 21.44f,-43.43f),
+        new Vector3(-20.16f, 17.67f,-3.8f),
+        new Vector3( 35.7f,  13.65f, 40.15f),
+    };
+    void MoveGoalToPreSetPlaces()
+    {
+        
+        if (goalPositionIdx < goalPositions.Length)
+        {
+            Goal.position = goalPositions[goalPositionIdx];
+        }
+        else
+        {
+            MoveGoalRandomly();   
+        }
+        goalPositionIdx++;
+    }
+    
     // ReSharper disable Unity.PerformanceAnalysis
     void MoveGoalClose()
     {
-        float t = Academy.Instance.TotalStepCount / curriculumEndStep;
+        float t = Academy.Instance.TotalStepCount * _numEnvsAdjustment/ curriculumEndStep;
         float curriculumSpawnDistance = Mathf.Lerp(_startCurriculumDistance, _maxCurriculumDistance, t);
         Vector3 raycastHitPos;
         int breaker = 0;
@@ -112,14 +164,14 @@ public class EpisodeHandler : MonoBehaviour
         Vector3 raycastHitPos;
         do {
             raycastHitPos = SampleRandomSpawnPoint();
-            freeBreaker++;
-            if (freeBreaker > 100)
+            _freeBreaker++;
+            if (_freeBreaker > 100)
             {
                 print("BROKEN");
                 break;
             }
         } while (!IsSpawnPointFree(raycastHitPos));
-        freeBreaker = 0;
+        _freeBreaker = 0;
         Goal.position = raycastHitPos  + new Vector3(0, 2, 0);
     }
     
@@ -128,14 +180,14 @@ public class EpisodeHandler : MonoBehaviour
         Vector3 raycastHitPos;
         do {
             raycastHitPos = SampleRandomSpawnPoint();
-            freeBreaker++;
-            if (freeBreaker > 100)
+            _freeBreaker++;
+            if (_freeBreaker > 100)
             {
                 print("BROKEN");
                 break;
             }
         } while (!IsSpawnPointFree(raycastHitPos));
-        freeBreaker = 0;
+        _freeBreaker = 0;
         Agent.position = raycastHitPos + new Vector3(0, 1, 0);
         _trailRenderer.Clear();
     }
@@ -178,10 +230,11 @@ public class EpisodeHandler : MonoBehaviour
         return hit.point;
     }
 
-    private int freeBreaker = 0;
+    private int _freeBreaker = 0;
+    private bool _testing = false;
+
     bool IsSpawnPointFree(Vector3 point)
     {
-        if (point.y < -12.5) return false;
         if (point == Vector3.zero) return false;
         Vector3 sphereCheckPoint = new Vector3(point.x, point.y + 1, point.z);
         int colliderCount = Physics.OverlapSphereNonAlloc(sphereCheckPoint, 0, _dummyCollider);
@@ -197,5 +250,20 @@ public class EpisodeHandler : MonoBehaviour
         bool isZInBound = -zLen / 2 + safetyOffset <= point.z && point.z < zLen / 2 - safetyOffset;
         return isXInBound && isYInBound && isZInBound;
     }
-   
+
+
+    private EpisodeDataset _episodeDataset;
+    void MoveGoalAgentToPresetPosition()
+    {
+        if (_episodeDataset == null)
+        {
+        }
+
+        DatasetCreator.AgentGoalPositions agp = _episodeDataset.GetEpisodePair();
+        
+        Goal.localPosition = agp.goalPosition;
+        Agent.localPosition = agp.agentPosition;
+    }
+
+    
 }
