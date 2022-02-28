@@ -8,3 +8,6 @@ We contribute several building blocks:
 (b) for game designers, a Unity game project and the pre-trained models to implement new AI-driven assistance methods;
 
 (c) and for human-computer interaction researchers, a set of example assistance methods powered by pre-trained models to investigate  and evaluate  the effects of those assistance methods.
+
+
+**Please include the submodule when cloning with ```git clone --recurse-submodules https://github.com/batu/NavAssist.git```**
